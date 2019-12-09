@@ -1,0 +1,75 @@
+﻿<dx:ThemedWindow x:Class="SearchAnyWay.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+        xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+        xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+        xmlns:dxlc="http://schemas.devexpress.com/winfx/2008/xaml/layoutcontrol"   
+        xmlns:dxg="http://schemas.devexpress.com/winfx/2008/xaml/grid"
+        xmlns:local="clr-namespace:SearchAnyWay"
+        mc:Ignorable="d"
+        Title="百度贴吧搜索神器(v1.0)" Height="600" Width="800">
+    <Grid>
+        <dxlc:LayoutControl VerticalAlignment="Stretch" Orientation="Vertical" TextBlock.FontSize="11">
+            <Label VerticalAlignment="Top" FontWeight="Bold" Content="输入您需要查找的关键字"></Label>
+            <dxlc:LayoutGroup Orientation="Horizontal">
+                <dxlc:LayoutItem Label="关键字(K)" AddColonToLabel="True">
+                    <dxe:TextEdit EditValue="{Binding Path=Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" >
+                        <dxmvvm:Interaction.Triggers>
+                            <dxmvvm:KeyToCommand KeyGesture="Enter" Command="{Binding SearchCommand}"></dxmvvm:KeyToCommand>
+                        </dxmvvm:Interaction.Triggers>
+                    </dxe:TextEdit>
+                </dxlc:LayoutItem>
+                <dxlc:LayoutItem Label="贴吧名(N)" AddColonToLabel="True">
+                    <dxe:TextEdit EditValue="{Binding Path=HubName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}">
+                    </dxe:TextEdit>
+                </dxlc:LayoutItem>
+                <dxlc:LayoutItem Label="爬取页数(P)" AddColonToLabel="True">
+                    <dxe:ComboBoxEdit ItemsSource="{Binding PageRange}"
+                                      SelectedItem="{Binding Page}"
+                                      ShowSizeGrip="False"
+                                      IsTextEditable="False">
+                    </dxe:ComboBoxEdit>
+                </dxlc:LayoutItem>
+                <dxlc:LayoutGroup HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <dx:SimpleButton x:Name="btnSearch" Content="查找(S)" Width="80" Command="{Binding SearchCommand}"></dx:SimpleButton>
+         
+                </dxlc:LayoutGroup>
+            </dxlc:LayoutGroup>
+            <dxg:TreeListControl x:Name="treeList"  Margin="0,10" ItemsSource="{Binding Source}"
+                                         SelectionMode="Row" SelectedItem="{Binding SelectedRow}">
+                <dxg:TreeListControl.Columns>
+                    <dxg:TreeListColumn  FieldName="Title" Header="标题"  Width="2*"/>
+                    <dxg:TreeListColumn  FieldName="Brief" Width="2*" Header="详情"/>
+                    <dxg:TreeListColumn Header="回复数" FieldName="CommentCount" Width="*"/>
+                    <dxg:TreeListColumn Header="作者" FieldName="AuthorName" Width="*"/>
+                </dxg:TreeListControl.Columns>
+                <dxg:TreeListControl.View>
+                    <dxg:TreeListView x:Name="view" VerticalScrollbarVisibility="Auto" AutoExpandAllNodes="True"  AllowEditing="False" NavigationStyle="Row" ShowIndicator="False"  TreeDerivationMode="ChildNodesSelector" ChildNodesPath="ICDItems">
+                        <dxmvvm:Interaction.Triggers>
+                            <dxmvvm:EventToCommand EventName="SourceUpdated" Command="{Binding Commands.ExpandAllNodes, ElementName=view}" />
+                            <dxmvvm:EventToCommand EventName="RowDoubleClick" Command="{Binding SearchCommand}" CommandParameter="{Binding ElementName=treeList,Path=SelectedItem}" />
+                        </dxmvvm:Interaction.Triggers>
+                    </dxg:TreeListView>
+                </dxg:TreeListControl.View>
+            </dxg:TreeListControl>
+            <dxlc:LayoutGroup VerticalAlignment="Bottom" Orientation="Horizontal">
+                <Label Content="帖子总数:" HorizontalAlignment="Right"/>
+                <Label Content="{Binding Source.Count, UpdateSourceTrigger=PropertyChanged}"  HorizontalAlignment="Right">
+                    </Label>
+            </dxlc:LayoutGroup>
+            <dxlc:LayoutGroup VerticalAlignment="Bottom" Orientation="Horizontal">
+                <dxe:CheckEdit IsChecked="{Binding IsAll}"  Content="Include All" HorizontalAlignment="Left"/>
+                <dx:SimpleButton Content="Copy VLPath To Clipboard" IsEnabled="{Binding CanNext}" Command="{Binding CopyVLPathCommand}" HorizontalAlignment="Left"></dx:SimpleButton>
+                <dxlc:LayoutGroup HorizontalAlignment="Right">
+                    <dx:SimpleButton Content="下载(D)" Width="80" IsEnabled="{Binding CanNext}" Command="{Binding NextCommand}"></dx:SimpleButton>
+                    <dx:SimpleButton Content="清除(C)" Width="80" IsEnabled="{Binding CanNext}" Command="{Binding OKCommand}"></dx:SimpleButton>
+                    <dx:SimpleButton Content="合作(P)" Width="80" Command="{Binding CancelCommand}"></dx:SimpleButton>
+                </dxlc:LayoutGroup>
+            </dxlc:LayoutGroup>
+        </dxlc:LayoutControl>
+        <dx:WaitIndicator  DeferedVisibility="{Binding IsLoading}" />
+    </Grid>
+</dx:ThemedWindow>
